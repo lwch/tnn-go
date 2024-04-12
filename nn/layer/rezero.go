@@ -49,5 +49,5 @@ func (layer *ReZero) Unfreeze() {
 }
 
 func (layer *ReZero) ToScalarType(t consts.ScalarType) {
-	layer.scale.ToScalarType(t)
+	layer.scale = layer.scale.ToScalarType(t)
 }

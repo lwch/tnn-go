@@ -53,5 +53,5 @@ func (layer *RMSNorm) Unfreeze() {
 }
 
 func (layer *RMSNorm) ToScalarType(t consts.ScalarType) {
-	layer.a.ToScalarType(t)
+	layer.a = layer.a.ToScalarType(t)
 }

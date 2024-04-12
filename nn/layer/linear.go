@@ -53,5 +53,5 @@ func (layer *Linear) Unfreeze() {
 }
 
 func (layer *Linear) ToScalarType(t consts.ScalarType) {
-	layer.w.ToScalarType(t)
+	layer.w = layer.w.ToScalarType(t)
 }
