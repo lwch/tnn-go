@@ -86,8 +86,8 @@ func (layer *Lstm) Forward(x, h, c *tensor.Tensor) (*tensor.Tensor, *tensor.Tens
 		}
 	}
 	return result.Reshape(inputShape[0], inputShape[1], int64(layer.hidden)),
-		copyState(layer.name+".hidden", h),
-		copyState(layer.name+".cell", c)
+		copyState(h),
+		copyState(c)
 }
 
 func (layer *Lstm) Params() map[string]*tensor.Tensor {
@@ -131,4 +131,15 @@ func (layer *Lstm) Unfreeze() {
 	layer.Bf.SetRequiresGrad(true)
 	layer.Bg.SetRequiresGrad(true)
 	layer.Bo.SetRequiresGrad(true)
+}
+
+func (layer *Lstm) ToScalarType(t consts.ScalarType) {
+	layer.Wi = layer.Wi.ToScalarType(t)
+	layer.Wf = layer.Wf.ToScalarType(t)
+	layer.Wg = layer.Wg.ToScalarType(t)
+	layer.Wo = layer.Wo.ToScalarType(t)
+	layer.Bi = layer.Bi.ToScalarType(t)
+	layer.Bf = layer.Bf.ToScalarType(t)
+	layer.Bg = layer.Bg.ToScalarType(t)
+	layer.Bo = layer.Bo.ToScalarType(t)
 }

@@ -39,10 +39,10 @@ func (m *model) Train(x, y *tensor.Tensor) float32 {
 	pred := m.Forward(x)
 	l := lossFunc(pred, y)
 	l.Backward()
-	value := l.Value()
+	value := l.Float32Value()[0]
 	m.optimizer.Step(m.net.Params())
 	runtime.GC()
-	return float32(value)
+	return value
 }
 
 func (m *model) Predict(x *tensor.Tensor) []float32 {
@@ -52,5 +52,5 @@ func (m *model) Predict(x *tensor.Tensor) []float32 {
 func (m *model) Loss(x, y *tensor.Tensor) float32 {
 	pred := m.Forward(x)
 	loss := lossFunc(y, pred)
-	return float32(loss.Value())
+	return loss.Float32Value()[0]
 }

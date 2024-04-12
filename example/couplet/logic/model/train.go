@@ -90,7 +90,7 @@ func (m *Model) trainWorker(samples []*sample.Sample) float64 {
 	loss := lossFunc(pred, yOut)
 	loss.Backward()
 	m.current.Add(uint64(len(samples)))
-	return loss.Value()
+	return float64(loss.Float32Value()[0])
 }
 
 func (m *Model) trainBatch(b []batch) float64 {

@@ -1,6 +1,7 @@
 package layer
 
 import (
+	"github.com/lwch/gotorch/consts"
 	"github.com/lwch/gotorch/tensor"
 )
 
@@ -101,4 +102,9 @@ func (layer *Conv2D) Freeze() {
 func (layer *Conv2D) Unfreeze() {
 	layer.w.SetRequiresGrad(true)
 	layer.b.SetRequiresGrad(true)
+}
+
+func (layer *Conv2D) ToScalarType(t consts.ScalarType) {
+	layer.w = layer.w.ToScalarType(t)
+	layer.b = layer.b.ToScalarType(t)
 }

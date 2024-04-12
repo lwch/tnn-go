@@ -315,3 +315,9 @@ func (n *Net) ReadFrom(r io.ReaderAt, size int64) (int64, error) {
 func (n *Net) Layers() []layer.Layer {
 	return n.layers
 }
+
+func (n *Net) ToScalarType(t consts.ScalarType) {
+	for _, l := range n.layers {
+		l.ToScalarType(t)
+	}
+}

@@ -52,7 +52,7 @@ func (m *model) Train(epoch int, x, y *tensor.Tensor) float32 {
 	pred := m.Forward(x, true)
 	l := lossFunc(pred, y)
 	l.Backward()
-	value := l.Value()
+	value := l.Float32Value()[0]
 	m.optimizer.Step(m.params())
 	runtime.GC()
 	return float32(value)
@@ -64,7 +64,7 @@ func (m *model) Predict(x *tensor.Tensor) []float32 {
 
 func (m *model) Loss(x, y *tensor.Tensor) float32 {
 	pred := m.Forward(x, false)
-	return float32(lossFunc(pred, y).Value())
+	return lossFunc(pred, y).Float32Value()[0]
 }
 
 func (m *model) params() []*tensor.Tensor {

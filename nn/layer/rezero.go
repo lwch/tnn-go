@@ -1,6 +1,7 @@
 package layer
 
 import (
+	"github.com/lwch/gotorch/consts"
 	"github.com/lwch/gotorch/tensor"
 )
 
@@ -45,4 +46,8 @@ func (layer *ReZero) Freeze() {
 
 func (layer *ReZero) Unfreeze() {
 	layer.scale.SetRequiresGrad(true)
+}
+
+func (layer *ReZero) ToScalarType(t consts.ScalarType) {
+	layer.scale.ToScalarType(t)
 }

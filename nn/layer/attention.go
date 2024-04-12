@@ -194,3 +194,7 @@ func (layer *Attention) Freeze() {
 func (layer *Attention) Unfreeze() {
 	layer.w.SetRequiresGrad(true)
 }
+
+func (layer *Attention) ToScalarType(t consts.ScalarType) {
+	layer.w = layer.w.ToScalarType(t)
+}

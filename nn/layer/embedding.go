@@ -1,6 +1,7 @@
 package layer
 
 import (
+	"github.com/lwch/gotorch/consts"
 	"github.com/lwch/gotorch/tensor"
 )
 
@@ -61,4 +62,8 @@ func (layer *Embedding) Freeze() {
 
 func (layer *Embedding) Unfreeze() {
 	layer.w.SetRequiresGrad(true)
+}
+
+func (layer *Embedding) ToScalarType(t consts.ScalarType) {
+	layer.w = layer.w.ToScalarType(t)
 }

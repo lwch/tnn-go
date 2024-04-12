@@ -17,6 +17,7 @@ type Layer interface {
 	Args() map[string]float32
 	Freeze()
 	Unfreeze()
+	ToScalarType(t consts.ScalarType)
 }
 
 type base struct {

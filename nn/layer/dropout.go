@@ -1,6 +1,7 @@
 package layer
 
 import (
+	"github.com/lwch/gotorch/consts"
 	"github.com/lwch/gotorch/tensor"
 )
 
@@ -31,4 +32,7 @@ func (layer *Dropout) Args() map[string]float32 {
 	return map[string]float32{
 		"keep": float32(layer.keep),
 	}
+}
+
+func (layer *Dropout) ToScalarType(t consts.ScalarType) {
 }

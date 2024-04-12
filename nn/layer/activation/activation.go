@@ -1,6 +1,9 @@
 package activation
 
-import "github.com/lwch/gotorch/tensor"
+import (
+	"github.com/lwch/gotorch/consts"
+	"github.com/lwch/gotorch/tensor"
+)
 
 type base struct {
 	class string
@@ -41,5 +44,9 @@ func (*base) Freeze() {
 }
 
 func (*base) Unfreeze() {
+	// activation have no params
+}
+
+func (*base) ToScalarType(t consts.ScalarType) {
 	// activation have no params
 }

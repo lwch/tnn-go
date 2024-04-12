@@ -36,7 +36,7 @@ func LoadRnn(name string, params map[string]*tensor.Tensor, args map[string]floa
 	return &layer
 }
 
-func copyState(name string, s *tensor.Tensor) *tensor.Tensor {
+func copyState(s *tensor.Tensor) *tensor.Tensor {
 	return tensor.FromFloat32(s.Float32Value(), tensor.WithShapes(s.Shapes()...))
 }
 
@@ -60,7 +60,7 @@ func (layer *Rnn) Forward(x, h *tensor.Tensor) (*tensor.Tensor, *tensor.Tensor) 
 		}
 	}
 	return result.Reshape(inputShape[0], inputShape[1], int64(layer.hidden)),
-		copyState(layer.name+".hidden", h)
+		copyState(h)
 }
 
 func (layer *Rnn) Params() map[string]*tensor.Tensor {
@@ -86,4 +86,9 @@ func (layer *Rnn) Freeze() {
 func (layer *Rnn) Unfreeze() {
 	layer.w.SetRequiresGrad(true)
 	layer.b.SetRequiresGrad(true)
+}
+
+func (layer *Rnn) ToScalarType(t consts.ScalarType) {
+	layer.w = layer.w.ToScalarType(t)
+	layer.b = layer.b.ToScalarType(t)
 }

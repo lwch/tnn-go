@@ -1,6 +1,7 @@
 package layer
 
 import (
+	"github.com/lwch/gotorch/consts"
 	"github.com/lwch/gotorch/tensor"
 )
 
@@ -27,4 +28,7 @@ func (layer *Flatten) Forward(x *tensor.Tensor) *tensor.Tensor {
 		cols *= v
 	}
 	return x.Reshape(shape[0], cols)
+}
+
+func (layer *Flatten) ToScalarType(t consts.ScalarType) {
 }

@@ -1,6 +1,7 @@
 package layer
 
 import (
+	"github.com/lwch/gotorch/consts"
 	"github.com/lwch/gotorch/tensor"
 )
 
@@ -74,4 +75,7 @@ func (layer *MaxPool1D) Args() map[string]float32 {
 		"dilation": float32(layer.dilation),
 		"ceil":     ceil,
 	}
+}
+
+func (layer *MaxPool1D) ToScalarType(t consts.ScalarType) {
 }
