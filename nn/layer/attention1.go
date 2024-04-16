@@ -65,12 +65,12 @@ func (layer *Attention1) Forward(q, k, v, mask *tensor.Tensor, isCausal, train b
 		panic("unexpected mask")
 	}
 	inputShape := q.Shapes()
-	q = q.MatMul(layer.q) // (batch, seq, dims)
-	k = k.MatMul(layer.k) // (batch, seq, dims)
-	v = v.MatMul(layer.v) // (batch, seq, dims)
-	q = layer.split(q)    // (batch, heads, seq, dims/heads)
-	k = layer.split(k)    // (batch, heads, seq, dims/heads)
-	v = layer.split(v)    // (batch, heads, seq, dims/heads)
+	q = q.MatMul(layer.q.Transpose(0, 1)) // (batch, seq, dims)
+	k = k.MatMul(layer.k.Transpose(0, 1)) // (batch, seq, dims)
+	v = v.MatMul(layer.v.Transpose(0, 1)) // (batch, seq, dims)
+	q = layer.split(q)                    // (batch, heads, seq, dims/heads)
+	k = layer.split(k)                    // (batch, heads, seq, dims/heads)
+	v = layer.split(v)                    // (batch, heads, seq, dims/heads)
 	if layer.rope {
 		q, k = layer.applyROPE(q, k, q.Shapes()[1])
 	}
@@ -95,10 +95,10 @@ func (layer *Attention1) Score(q, k, v, mask *tensor.Tensor, isCausal, train boo
 	if mask != nil && isCausal {
 		panic("unexpected mask")
 	}
-	q = q.MatMul(layer.q) // (batch, seq, dims)
-	k = k.MatMul(layer.k) // (batch, seq, dims)
-	q = layer.split(q)    // (batch, heads, seq, dims/heads)
-	k = layer.split(k)    // (batch, heads, seq, dims/heads)
+	q = q.MatMul(layer.q.Transpose(0, 1)) // (batch, seq, dims)
+	k = k.MatMul(layer.k.Transpose(0, 1)) // (batch, seq, dims)
+	q = layer.split(q)                    // (batch, heads, seq, dims/heads)
+	k = layer.split(k)                    // (batch, heads, seq, dims/heads)
 	if layer.rope {
 		q, k = layer.applyROPE(q, k, q.Shapes()[1])
 	}
