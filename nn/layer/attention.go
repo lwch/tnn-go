@@ -14,8 +14,8 @@ type Attention struct {
 	rope        bool
 	ropeBase    int64
 	// params
-	w     *tensor.Tensor
-	scale *tensor.Tensor
+	q, k, v *tensor.Tensor
+	scale   *tensor.Tensor
 	// runtime
 	freqs *tensor.Tensor
 }
@@ -31,7 +31,9 @@ func NewAttention(name string, dims, heads int, dropout float64, rope bool, opts
 	if layer.dims%layer.heads != 0 {
 		panic("dims must be divisible by heads")
 	}
-	layer.w = layer.initW(int64(dims*3), int64(dims*3))
+	layer.q = layer.initW(int64(dims), int64(dims))
+	layer.k = layer.initW(int64(dims), int64(dims))
+	layer.v = layer.initW(int64(dims), int64(dims))
 	layer.scale = layer.initN(math.Sqrt(float64(dims)))
 	return &layer
 }
@@ -47,7 +49,9 @@ func LoadAttention(name string, params map[string]*tensor.Tensor, args map[strin
 	if layer.ropeBase <= 0 {
 		layer.ropeBase = 10000
 	}
-	layer.w = params["w"]
+	layer.q = params["q"]
+	layer.k = params["k"]
+	layer.v = params["v"]
 	layer.scale = layer.initN(math.Sqrt(float64(layer.dims)))
 	return &layer
 }
@@ -61,14 +65,12 @@ func (layer *Attention) Forward(q, k, v, mask *tensor.Tensor, isCausal, train bo
 		panic("unexpected mask")
 	}
 	inputShape := q.Shapes()
-	x := tensor.Cat([]*tensor.Tensor{q, k, v}, -1)           // (batch, seq, dims*3)
-	x = x.MatMul(layer.w.Transpose(0, 1))                    // (batch, seq, dims*3)
-	q = x.NArrow(-1, 0, int64(layer.dims))                   // (batch, seq, dims)
-	k = x.NArrow(-1, int64(layer.dims), int64(layer.dims))   // (batch, seq, dims)
-	v = x.NArrow(-1, int64(layer.dims*2), int64(layer.dims)) // (batch, seq, dims)
-	q = layer.split(q)                                       // (batch, seq, heads, dims/heads)
-	k = layer.split(k)                                       // (batch, seq, heads, dims/heads)
-	v = layer.split(v)                                       // (batch, seq, heads, dims/heads)
+	q = q.MatMul(layer.q) // (batch, seq, dims)
+	k = k.MatMul(layer.k) // (batch, seq, dims)
+	v = v.MatMul(layer.v) // (batch, seq, dims)
+	q = layer.split(q)    // (batch, seq, heads, dims/heads)
+	k = layer.split(k)    // (batch, seq, heads, dims/heads)
+	v = layer.split(v)    // (batch, seq, heads, dims/heads)
 	if layer.rope {
 		q, k = layer.applyROPE(q, k, q.Shapes()[1])
 	}
@@ -89,12 +91,10 @@ func (layer *Attention) Score(q, k, v, mask *tensor.Tensor, isCausal, train bool
 	if mask != nil && isCausal {
 		panic("unexpected mask")
 	}
-	x := tensor.Cat([]*tensor.Tensor{q, k, v}, -1)         // (batch, seq, dims*3)
-	x = x.MatMul(layer.w)                                  // (batch, seq, dims*3)
-	q = x.NArrow(-1, 0, int64(layer.dims))                 // (batch, seq, dims)
-	k = x.NArrow(-1, int64(layer.dims), int64(layer.dims)) // (batch, seq, dims)
-	q = layer.split(q)                                     // (batch, seq, heads, dims/heads)
-	k = layer.split(k)                                     // (batch, seq, heads, dims/heads)
+	q = q.MatMul(layer.q) // (batch, seq, dims)
+	k = k.MatMul(layer.k) // (batch, seq, dims)
+	q = layer.split(q)    // (batch, seq, heads, dims/heads)
+	k = layer.split(k)    // (batch, seq, heads, dims/heads)
 	if layer.rope {
 		q, k = layer.applyROPE(q, k, q.Shapes()[1])
 	}
@@ -169,7 +169,9 @@ func (layer *Attention) split(x *tensor.Tensor) *tensor.Tensor {
 
 func (layer *Attention) Params() map[string]*tensor.Tensor {
 	return map[string]*tensor.Tensor{
-		"w": layer.w,
+		"q": layer.q,
+		"k": layer.k,
+		"v": layer.v,
 	}
 }
 
@@ -188,13 +190,19 @@ func (layer *Attention) Args() map[string]float32 {
 }
 
 func (layer *Attention) Freeze() {
-	layer.w.SetRequiresGrad(false)
+	layer.q.SetRequiresGrad(false)
+	layer.k.SetRequiresGrad(false)
+	layer.v.SetRequiresGrad(false)
 }
 
 func (layer *Attention) Unfreeze() {
-	layer.w.SetRequiresGrad(true)
+	layer.q.SetRequiresGrad(true)
+	layer.k.SetRequiresGrad(true)
+	layer.v.SetRequiresGrad(true)
 }
 
 func (layer *Attention) ToScalarType(t consts.ScalarType) {
-	layer.w = layer.w.ToScalarType(t)
+	layer.q = layer.q.ToScalarType(t)
+	layer.k = layer.k.ToScalarType(t)
+	layer.v = layer.v.ToScalarType(t)
 }
