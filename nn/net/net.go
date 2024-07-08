@@ -68,6 +68,10 @@ func (n *Net) Add(layers ...layer.Layer) {
 	n.layers = append(n.layers, layers...)
 }
 
+func (n *Net) Clear() {
+	n.layers = nil
+}
+
 func (n *Net) SetOptimizer(optm optimizer.Optimizer) {
 	n.optimizer = optm
 }
