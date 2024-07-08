@@ -15,7 +15,6 @@ type Conv2D struct {
 	groups    int
 	// params
 	w *tensor.Tensor
-	b *tensor.Tensor
 }
 
 func NewConv2D(name string, inC, outC int, kernel1, kernel2 int, opts ...LayerCreateOption) *Conv2D {
@@ -29,7 +28,6 @@ func NewConv2D(name string, inC, outC int, kernel1, kernel2 int, opts ...LayerCr
 	layer.dilation = 1
 	layer.groups = 1
 	layer.w = layer.initW(int64(outC), int64(inC), int64(kernel1), int64(kernel2))
-	layer.b = layer.initB(int64(outC))
 	return &layer
 }
 
@@ -60,12 +58,11 @@ func LoadConv2D(name string, params []*tensor.Tensor, args map[string]float32) L
 	layer.dilation = int(args["dilation"])
 	layer.groups = int(args["groups"])
 	layer.w = params[0]
-	layer.b = params[1]
 	return &layer
 }
 
 func (layer *Conv2D) Forward(x *tensor.Tensor) *tensor.Tensor {
-	return x.Conv2D(layer.w, layer.b,
+	return x.Conv2D(layer.w, nil,
 		tensor.Conv2DStride(layer.stride[0], layer.stride[1]),
 		tensor.Conv2DPadding(layer.padding[0], layer.padding[1]),
 		tensor.Conv2DDilation(layer.dilation),
@@ -75,7 +72,6 @@ func (layer *Conv2D) Forward(x *tensor.Tensor) *tensor.Tensor {
 func (layer *Conv2D) Params() []*tensor.Tensor {
 	return []*tensor.Tensor{
 		layer.w,
-		layer.b,
 	}
 }
 
@@ -96,15 +92,12 @@ func (layer *Conv2D) Args() map[string]float32 {
 
 func (layer *Conv2D) Freeze() {
 	layer.w.SetRequiresGrad(false)
-	layer.b.SetRequiresGrad(false)
 }
 
 func (layer *Conv2D) Unfreeze() {
 	layer.w.SetRequiresGrad(true)
-	layer.b.SetRequiresGrad(true)
 }
 
 func (layer *Conv2D) ToScalarType(t consts.ScalarType) {
 	layer.w = layer.w.ToScalarType(t)
-	layer.b = layer.b.ToScalarType(t)
 }
