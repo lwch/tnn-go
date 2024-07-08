@@ -18,6 +18,17 @@ message layer {
     map<string, float>   args = 4;
 }
 
+message optimizer_param {
+    repeated param params = 1;
+}
+
+message optimizer {
+    string                    class = 1;
+    bytes                   options = 2;
+    repeated optimizer_param params = 3;
+}
+
 message net {
     repeated layer layers = 1;
+    optimizer   optimizer = 2;
 }

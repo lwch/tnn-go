@@ -17,7 +17,7 @@ type model struct {
 	optimizer   optimizer.Optimizer
 }
 
-func newModel(optimizer optimizer.Optimizer) *model {
+func newModel() *model {
 	var m model
 	for i := 0; i < transformerSize; i++ {
 		m.attn = append(m.attn, newTransformer())
@@ -25,7 +25,7 @@ func newModel(optimizer optimizer.Optimizer) *model {
 	m.flatten = layer.NewFlatten("flatten")
 	m.sigmoid = activation.NewSigmoid()
 	m.outputLayer = layer.NewLinear("output", unitSize, 1, layer.WithDevice(device))
-	m.optimizer = optimizer
+	m.optimizer = optimizer.NewAdam(m.params(), optimizer.WithAdamLr(lr))
 	return &m
 }
 
@@ -48,7 +48,7 @@ func (m *model) Train(x, y *tensor.Tensor) {
 }
 
 func (m *model) Apply() {
-	m.optimizer.Step(m.params())
+	m.optimizer.Step()
 }
 
 func (m *model) Predict(x *tensor.Tensor) []float32 {

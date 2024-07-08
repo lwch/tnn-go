@@ -18,14 +18,15 @@ type model struct {
 	optimizer   optimizer.Optimizer
 }
 
-func newModel(optimizer optimizer.Optimizer) *model {
-	return &model{
+func newModel() *model {
+	m := &model{
 		rnn: layer.NewRnn("rnn", featureSize, steps, hiddenSize, layer.WithDevice(device)),
 		// lstm:        layer.NewLstm("lstm", featureSize, steps, hiddenSize, layer.WithDevice(device)),
 		flatten:     layer.NewFlatten("flatten"),
 		outputLayer: layer.NewLinear("output", steps*hiddenSize, 1, layer.WithDevice(device)),
-		optimizer:   optimizer,
 	}
+	m.optimizer = optimizer.NewAdam(m.params(), optimizer.WithAdamLr(lr))
+	return m
 }
 
 func (m *model) Forward(x *tensor.Tensor, train bool) *tensor.Tensor {
@@ -53,7 +54,7 @@ func (m *model) Train(epoch int, x, y *tensor.Tensor) float32 {
 	l := lossFunc(pred, y)
 	l.Backward()
 	value := l.Float32Value()[0]
-	m.optimizer.Step(m.params())
+	m.optimizer.Step()
 	runtime.GC()
 	return float32(value)
 }

@@ -11,15 +11,13 @@ import (
 )
 
 type model struct {
-	net       *net.Net
-	optimizer optimizer.Optimizer
+	net *net.Net
 }
 
-func newModel(net *net.Net, optimizer optimizer.Optimizer) *model {
-	return &model{
-		net:       net,
-		optimizer: optimizer,
-	}
+func newModel(net *net.Net) *model {
+	m := &model{net: net}
+	m.net.SetOptimizer(optimizer.NewAdam(m.net.Params(), optimizer.WithAdamLr(lr)))
+	return m
 }
 
 func (m *model) Forward(x *tensor.Tensor) *tensor.Tensor {
@@ -40,7 +38,7 @@ func (m *model) Train(x, y *tensor.Tensor) float32 {
 	l := lossFunc(pred, y)
 	l.Backward()
 	value := l.Float32Value()[0]
-	m.optimizer.Step(m.net.Params())
+	m.net.GetOptimizer().Step()
 	runtime.GC()
 	return value
 }

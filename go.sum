@@ -32,6 +32,14 @@ github.com/klauspost/compress v1.17.0 h1:Rnbp4K9EjcDuVuHtd0dgA4qNuv9yKDYKK1ulpJw
 github.com/klauspost/compress v1.17.0/go.mod h1:ntbaceVETuRiXiv4DpjP66DpAtAGkEQskQzEyD//IeE=
 github.com/lwch/gotorch v1.7.2 h1:HJXP9YXrj6osUXlfXaodAhZhIjaVubwYg4+UalCUZUA=
 github.com/lwch/gotorch v1.7.2/go.mod h1:ZYDxRXkVVswExYvGWHgvaaDmXqQEtmockbuIBtp/qOA=
+github.com/lwch/gotorch v1.7.5-0.20240708093904-a7ac71efd41e h1:GRvi7S/BZLPkHFWs9UC/U0IhK07tf5+Qv8iu3Y7jZ3M=
+github.com/lwch/gotorch v1.7.5-0.20240708093904-a7ac71efd41e/go.mod h1:ZYDxRXkVVswExYvGWHgvaaDmXqQEtmockbuIBtp/qOA=
+github.com/lwch/gotorch v1.7.5-0.20240708095425-1dc625bdf507 h1:IPySXfHfQ/Rs+Pbvu1z4s9kVKus6jmDXdkOdoW5cPoA=
+github.com/lwch/gotorch v1.7.5-0.20240708095425-1dc625bdf507/go.mod h1:ZYDxRXkVVswExYvGWHgvaaDmXqQEtmockbuIBtp/qOA=
+github.com/lwch/gotorch v1.7.5-0.20240708110034-aeb77dc07e17 h1:15wIS8R5Ov0rhUAgnMYkJll+f3nXqgp7NKbs6cuvTeg=
+github.com/lwch/gotorch v1.7.5-0.20240708110034-aeb77dc07e17/go.mod h1:ZYDxRXkVVswExYvGWHgvaaDmXqQEtmockbuIBtp/qOA=
+github.com/lwch/gotorch v1.7.5-0.20240708111252-85bd57877813 h1:XlMLDafNAyZVya9wJvw8lCH6V7RPMj++Yro2SAn5OSs=
+github.com/lwch/gotorch v1.7.5-0.20240708111252-85bd57877813/go.mod h1:ZYDxRXkVVswExYvGWHgvaaDmXqQEtmockbuIBtp/qOA=
 github.com/lwch/logging v1.1.3 h1:fYppr1h3TxSwH4WNHeO5g1gt1KDg4omd0rYw4ttddcU=
 github.com/lwch/logging v1.1.3/go.mod h1:MxaC1CKm3o5EZcgRvPMXxS2ogwXTEPeo/3SCBiTqn3o=
 github.com/lwch/runtime v1.0.1 h1:xfurs9IGzkTWfdum1K5GaDkEuGopohOQhk7roELmbf4=

@@ -94,6 +94,7 @@ func (m *Model) save() {
 		net.Add(attn.layers()...)
 	}
 	net.Add(m.relu, m.output)
+	net.SetOptimizer(m.optimizer)
 	err := net.Save(filepath.Join(m.modelDir, "couplet.model"))
 	runtime.Assert(err)
 	fmt.Println("model saved")

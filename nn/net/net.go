@@ -7,11 +7,13 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"strings"
 	"sync"
 	"time"
 
 	"github.com/klauspost/compress/zstd"
 	"github.com/lwch/gotorch/consts"
+	"github.com/lwch/gotorch/optimizer"
 	"github.com/lwch/gotorch/tensor"
 	"github.com/lwch/runtime"
 	"github.com/lwch/tnn/internal/pb"
@@ -49,8 +51,9 @@ func RegisterLoadFunc(class string, fn loadFunc) {
 }
 
 type Net struct {
-	layers []layer.Layer
-	device consts.DeviceType
+	layers    []layer.Layer
+	device    consts.DeviceType
+	optimizer optimizer.Optimizer
 }
 
 func New(device consts.DeviceType) *Net {
@@ -63,6 +66,14 @@ func (n *Net) SetDevice(device consts.DeviceType) {
 
 func (n *Net) Add(layers ...layer.Layer) {
 	n.layers = append(n.layers, layers...)
+}
+
+func (n *Net) SetOptimizer(optm optimizer.Optimizer) {
+	n.optimizer = optm
+}
+
+func (n *Net) GetOptimizer() optimizer.Optimizer {
+	return n.optimizer
 }
 
 func (n *Net) Params() []*tensor.Tensor {
@@ -103,17 +114,12 @@ func (n *Net) WriteTo(w io.Writer) (int64, error) {
 	})
 	var net pb.Net
 	net.Layers = make([]*pb.Layer, len(n.layers))
-	type layer struct {
-		names  []string
-		params []*tensor.Tensor
-	}
-	var layers []layer
+	params := make(map[string]*tensor.Tensor)
 	for i := 0; i < len(n.layers); i++ {
 		net.Layers[i] = new(pb.Layer)
 		net.Layers[i].Class = n.layers[i].Class()
 		net.Layers[i].Name = n.layers[i].Name()
 		net.Layers[i].Params = make(map[string]*pb.Param)
-		var layer layer
 		for name, p := range n.layers[i].Params() {
 			var param pb.Param
 			param.Type = uint32(p.ScalarType())
@@ -122,12 +128,34 @@ func (n *Net) WriteTo(w io.Writer) (int64, error) {
 			param.Shapes = make([]int64, p.Dims())
 			copy(param.Shapes, p.Shapes())
 			param.File = fmt.Sprintf("layer_%d_param_%s.bin", i, name)
-			layer.names = append(layer.names, name)
-			layer.params = append(layer.params, p)
+			params[param.File] = p
 			net.Layers[i].Params[name] = &param
 		}
-		layers = append(layers, layer)
 		net.Layers[i].Args = n.layers[i].Args()
+	}
+	if n.optimizer != nil {
+		net.Optimizer = new(pb.Optimizer)
+		net.Optimizer.Class = n.optimizer.GetName()
+		var buf bytes.Buffer
+		_, err := n.optimizer.GetOptions().WriteTo(&buf)
+		if err != nil {
+			return 0, err
+		}
+		net.Optimizer.Options = buf.Bytes()
+		for i, arr := range n.optimizer.GetState() {
+			var op pb.OptimizerParam
+			for j, p := range arr {
+				var param pb.Param
+				param.Type = uint32(p.ScalarType())
+				param.ElemCount = p.ElemCount()
+				param.Shapes = make([]int64, p.Dims())
+				copy(param.Shapes, p.Shapes())
+				param.File = fmt.Sprintf("optimizer_%d_param_%d.bin", i, j)
+				params[param.File] = p
+				op.Params = append(op.Params, &param)
+			}
+			net.Optimizer.Params = append(net.Optimizer.Params, &op)
+		}
 	}
 	data, err := proto.Marshal(&net)
 	if err != nil {
@@ -145,50 +173,59 @@ func (n *Net) WriteTo(w io.Writer) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
-	for i, layer := range layers {
-		for j := 0; j < len(layer.names); j++ {
-			name := layer.names[j]
-			param := layer.params[j]
-			err = func() error {
-				f, err := zw.CreateHeader(&zip.FileHeader{
-					Name:     fmt.Sprintf("layer_%d_param_%s.bin", i, name),
-					Method:   zip.Deflate,
-					Modified: time.Now(),
-				})
-				if err != nil {
-					return err
-				}
-				param = param.ToDevice(consts.KCPU)
-				switch param.ScalarType() {
-				case consts.KUint8:
-					return binary.Write(f, binary.BigEndian, param.Uint8Value())
-				case consts.KInt8:
-					return binary.Write(f, binary.BigEndian, param.Int8Value())
-				case consts.KInt16:
-					return binary.Write(f, binary.BigEndian, param.Int16Value())
-				case consts.KInt32:
-					return binary.Write(f, binary.BigEndian, param.Int32Value())
-				case consts.KInt64:
-					return binary.Write(f, binary.BigEndian, param.Int64Value())
-				case consts.KHalf:
-					return binary.Write(f, binary.BigEndian, param.HalfRaw())
-				case consts.KFloat:
-					return binary.Write(f, binary.BigEndian, param.Float32Value())
-				case consts.KDouble:
-					return binary.Write(f, binary.BigEndian, param.Float64Value())
-				case consts.KBool:
-					return binary.Write(f, binary.BigEndian, param.BoolValue())
-				case consts.KBFloat16:
-					return binary.Write(f, binary.BigEndian, param.BFloat16Raw())
-				default:
-					panic(fmt.Errorf("unsupported scalar type: %s", param.ScalarType().String()))
-				}
-			}()
+	for file, param := range params {
+		var bytes int64
+		err = func() error {
+			f, err := zw.CreateHeader(&zip.FileHeader{
+				Name:     file,
+				Method:   zip.Deflate,
+				Modified: time.Now(),
+			})
 			if err != nil {
-				return 0, err
+				return err
 			}
-			cnt += int64(param.ElemCount() * 4)
+			if !strings.HasPrefix(file, "optimizer_") {
+				param = param.ToDevice(consts.KCPU)
+			}
+			switch param.ScalarType() {
+			case consts.KUint8:
+				bytes = 1
+				return binary.Write(f, binary.BigEndian, param.Uint8Value())
+			case consts.KInt8:
+				bytes = 1
+				return binary.Write(f, binary.BigEndian, param.Int8Value())
+			case consts.KInt16:
+				bytes = 2
+				return binary.Write(f, binary.BigEndian, param.Int16Value())
+			case consts.KInt32:
+				bytes = 4
+				return binary.Write(f, binary.BigEndian, param.Int32Value())
+			case consts.KInt64:
+				bytes = 8
+				return binary.Write(f, binary.BigEndian, param.Int64Value())
+			case consts.KHalf:
+				bytes = 2
+				return binary.Write(f, binary.BigEndian, param.HalfRaw())
+			case consts.KFloat:
+				bytes = 4
+				return binary.Write(f, binary.BigEndian, param.Float32Value())
+			case consts.KDouble:
+				bytes = 8
+				return binary.Write(f, binary.BigEndian, param.Float64Value())
+			case consts.KBool:
+				bytes = 1
+				return binary.Write(f, binary.BigEndian, param.BoolValue())
+			case consts.KBFloat16:
+				bytes = 2
+				return binary.Write(f, binary.BigEndian, param.BFloat16Raw())
+			default:
+				panic(fmt.Errorf("unsupported scalar type: %s", param.ScalarType().String()))
+			}
+		}()
+		if err != nil {
+			return 0, err
 		}
+		cnt += param.ElemCount() * bytes
 	}
 	return cnt, nil
 }
@@ -234,7 +271,6 @@ func buildParam[T uint8 | int8 | int16 | uint16 | int32 | int64 |
 	t := fn(data,
 		tensor.WithShapes(shapes...),
 		tensor.WithDevice(device))
-	t.SetRequiresGrad(true)
 	return t, nil
 }
 
@@ -303,12 +339,45 @@ func (n *Net) ReadFrom(r io.ReaderAt, size int64) (int64, error) {
 					consts.ScalarType(param.GetType()),
 					param.GetElemCount(),
 					param.GetShapes())
+				params[param.GetName()].SetRequiresGrad(true)
 				runtime.Assert(err)
 			}
 			n.layers[i] = fn(layers[i].GetName(), params, layers[i].GetArgs())
 		}(i)
 	}
 	wg.Wait()
+
+	if spec.GetOptimizer() != nil {
+		switch spec.GetOptimizer().GetClass() {
+		case "Adam":
+			n.optimizer = optimizer.NewAdam(n.Params())
+		case "AdamW":
+			n.optimizer = optimizer.NewAdamW(n.Params())
+		default:
+			panic("unsupported optimizer: " + spec.GetOptimizer().GetClass())
+		}
+		_, err = n.optimizer.GetOptions().ReadFrom(bytes.NewReader(spec.GetOptimizer().GetOptions()))
+		if err != nil {
+			return 0, err
+		}
+		var state [][]*tensor.Tensor
+		for _, params := range spec.GetOptimizer().GetParams() {
+			var arr []*tensor.Tensor
+			for _, param := range params.GetParams() {
+				t, err := n.loadParam(zr,
+					param.GetFile(),
+					consts.ScalarType(param.GetType()),
+					param.GetElemCount(),
+					param.GetShapes())
+				if err != nil {
+					return 0, err
+				}
+				arr = append(arr, t)
+			}
+			state = append(state, arr)
+		}
+		n.optimizer.SetState(state)
+	}
 	return size, nil
 }
 

@@ -6,7 +6,6 @@ import (
 
 	"github.com/lwch/gotorch/consts"
 	"github.com/lwch/gotorch/loss"
-	"github.com/lwch/gotorch/optimizer"
 	"github.com/lwch/gotorch/tensor"
 	"github.com/lwch/runtime"
 	"gonum.org/v1/plot"
@@ -38,8 +37,7 @@ func main() {
 		}
 	}
 
-	optimizer := optimizer.NewAdam(optimizer.WithAdamLr(lr))
-	m := newModel(optimizer)
+	m := newModel()
 
 	p := plot.New()
 	p.Title.Text = "predict sin(x)"

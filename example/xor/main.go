@@ -8,7 +8,6 @@ import (
 
 	"github.com/lwch/gotorch/consts"
 	"github.com/lwch/gotorch/loss"
-	"github.com/lwch/gotorch/optimizer"
 	"github.com/lwch/gotorch/tensor"
 	"github.com/lwch/runtime"
 	"github.com/lwch/tnn/nn/layer"
@@ -47,9 +46,8 @@ func train() {
 	net.Add(activation.NewReLU())
 	net.Add(outputLayer)
 	// optimizer := optimizer.NewSGD(lr, 0)
-	optimizer := optimizer.NewAdam(optimizer.WithAdamLr(lr))
 
-	m := newModel(net, optimizer)
+	m := newModel(net)
 
 	p := plot.New()
 	p.Title.Text = "xor train model"
@@ -91,8 +89,7 @@ func loadModel() *model {
 	net := net.New(device)
 	runtime.Assert(net.Load(modelFile))
 
-	optimizer := optimizer.NewAdam(optimizer.WithAdamLr(lr))
-	return newModel(net, optimizer)
+	return newModel(net)
 }
 
 func nextTrain(m *model) {

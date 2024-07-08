@@ -48,7 +48,7 @@ func (m *Model) Train(sampleDir, modelDir string) {
 
 	m.total = len(m.samples)
 
-	m.optimizer = optimizer.NewAdam(optimizer.WithAdamLr(lr))
+	m.optimizer = optimizer.NewAdam(m.params(), optimizer.WithAdamLr(lr))
 	// optimizer := optimizer.NewSGD(lr, 0)
 
 	go m.showProgress()
@@ -98,7 +98,7 @@ func (m *Model) trainBatch(b []batch) float64 {
 	for i := 0; i < len(b); i++ {
 		sum += m.trainWorker(b[i].data)
 	}
-	m.optimizer.Step(m.params())
+	m.optimizer.Step()
 	rt.GC()
 	return sum / float64(len(b))
 }
