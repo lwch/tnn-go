@@ -21,12 +21,12 @@ func NewRMSNorm(name string, dims int64, opts ...LayerCreateOption) *RMSNorm {
 	return &layer
 }
 
-func LoadRMSNorm(name string, params map[string]*tensor.Tensor, args map[string]float32) Layer {
+func LoadRMSNorm(name string, params []*tensor.Tensor, args map[string]float32) Layer {
 	var layer RMSNorm
 	layer.new("rms_norm", name)
-	layer.paramType = params["a"].ScalarType()
+	layer.paramType = params[0].ScalarType()
 	layer.eps = layer.initN(1e-9)
-	layer.a = params["a"]
+	layer.a = params[0]
 	return &layer
 }
 
@@ -38,9 +38,9 @@ func (layer *RMSNorm) Forward(x *tensor.Tensor) *tensor.Tensor {
 	return layer.a.Mul(layer.norm(x))
 }
 
-func (layer *RMSNorm) Params() map[string]*tensor.Tensor {
-	return map[string]*tensor.Tensor{
-		"a": layer.a,
+func (layer *RMSNorm) Params() []*tensor.Tensor {
+	return []*tensor.Tensor{
+		layer.a,
 	}
 }
 

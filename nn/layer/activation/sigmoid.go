@@ -15,7 +15,7 @@ func NewSigmoid() *Sigmoid {
 	return &layer
 }
 
-func LoadSigmoid(name string, _ map[string]*tensor.Tensor, _ map[string]float32) layer.Layer {
+func LoadSigmoid(name string, _ []*tensor.Tensor, _ map[string]float32) layer.Layer {
 	var layer Sigmoid
 	layer.base = new("sigmoid")
 	layer.name = name

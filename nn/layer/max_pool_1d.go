@@ -41,7 +41,7 @@ func (layer *MaxPool1D) SetCeil(ceil bool) {
 	layer.ceil = ceil
 }
 
-func LoadMaxPool1D(name string, _ map[string]*tensor.Tensor, args map[string]float32) Layer {
+func LoadMaxPool1D(name string, _ []*tensor.Tensor, args map[string]float32) Layer {
 	var layer MaxPool1D
 	layer.new("maxpool1d", name)
 	layer.kernel = int(args["kernel"])

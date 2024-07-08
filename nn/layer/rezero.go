@@ -19,10 +19,10 @@ func NewReZero(name string, opts ...LayerCreateOption) *ReZero {
 	return &layer
 }
 
-func LoadReZero(name string, params map[string]*tensor.Tensor, args map[string]float32) Layer {
+func LoadReZero(name string, params []*tensor.Tensor, args map[string]float32) Layer {
 	var layer ReZero
 	layer.new("rezero", name)
-	layer.scale = params["scale"]
+	layer.scale = params[0]
 	return &layer
 }
 
@@ -30,9 +30,9 @@ func (layer *ReZero) Forward(x *tensor.Tensor) *tensor.Tensor {
 	return x.Mul(layer.scale)
 }
 
-func (layer *ReZero) Params() map[string]*tensor.Tensor {
-	return map[string]*tensor.Tensor{
-		"scale": layer.scale,
+func (layer *ReZero) Params() []*tensor.Tensor {
+	return []*tensor.Tensor{
+		layer.scale,
 	}
 }
 

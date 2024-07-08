@@ -24,13 +24,13 @@ func NewEmbedding(name string, num, dim int, opts ...LayerCreateOption) *Embeddi
 	return &layer
 }
 
-func LoadEmbedding(name string, params map[string]*tensor.Tensor, args map[string]float32) Layer {
+func LoadEmbedding(name string, params []*tensor.Tensor, args map[string]float32) Layer {
 	var layer Embedding
 	layer.new("embedding", name)
 	layer.num = int(args["num"])
 	layer.dim = int(args["dim"])
 	layer.padding = int64(args["padding"])
-	layer.w = params["w"]
+	layer.w = params[0]
 	return &layer
 }
 
@@ -42,9 +42,9 @@ func (layer *Embedding) Forward(x *tensor.Tensor) *tensor.Tensor {
 	return tensor.Embedding(x, layer.w, layer.padding)
 }
 
-func (layer *Embedding) Params() map[string]*tensor.Tensor {
-	return map[string]*tensor.Tensor{
-		"w": layer.w,
+func (layer *Embedding) Params() []*tensor.Tensor {
+	return []*tensor.Tensor{
+		layer.w,
 	}
 }
 

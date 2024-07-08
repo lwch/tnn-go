@@ -15,7 +15,7 @@ func NewTanh() *Tanh {
 	return &layer
 }
 
-func LoadTanh(name string, _ map[string]*tensor.Tensor, _ map[string]float32) layer.Layer {
+func LoadTanh(name string, _ []*tensor.Tensor, _ map[string]float32) layer.Layer {
 	var layer Tanh
 	layer.base = new("tanh")
 	layer.name = name

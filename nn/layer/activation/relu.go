@@ -15,7 +15,7 @@ func NewReLU() *ReLU {
 	return &layer
 }
 
-func LoadRelu(name string, _ map[string]*tensor.Tensor, _ map[string]float32) layer.Layer {
+func LoadRelu(name string, _ []*tensor.Tensor, _ map[string]float32) layer.Layer {
 	var layer ReLU
 	layer.base = new("relu")
 	layer.name = name

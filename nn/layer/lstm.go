@@ -32,20 +32,20 @@ func NewLstm(name string, featureSize, steps, hidden int, opts ...LayerCreateOpt
 	return &layer
 }
 
-func LoadLstm(name string, params map[string]*tensor.Tensor, args map[string]float32) Layer {
+func LoadLstm(name string, params []*tensor.Tensor, args map[string]float32) Layer {
 	var layer Lstm
 	layer.new("lstm", name)
 	layer.featureSize = int(args["feature_size"])
 	layer.steps = int(args["steps"])
 	layer.hidden = int(args["hidden"])
-	layer.Wi = params["Wi"]
-	layer.Wf = params["Wf"]
-	layer.Wg = params["Wg"]
-	layer.Wo = params["Wo"]
-	layer.Bi = params["Bi"]
-	layer.Bf = params["Bf"]
-	layer.Bg = params["Bg"]
-	layer.Bo = params["Bo"]
+	layer.Wi = params[0]
+	layer.Wf = params[1]
+	layer.Wg = params[2]
+	layer.Wo = params[3]
+	layer.Bi = params[4]
+	layer.Bf = params[5]
+	layer.Bg = params[6]
+	layer.Bo = params[7]
 	return &layer
 }
 
@@ -90,16 +90,16 @@ func (layer *Lstm) Forward(x, h, c *tensor.Tensor) (*tensor.Tensor, *tensor.Tens
 		copyState(c)
 }
 
-func (layer *Lstm) Params() map[string]*tensor.Tensor {
-	return map[string]*tensor.Tensor{
-		"Wi": layer.Wi,
-		"Wf": layer.Wf,
-		"Wg": layer.Wg,
-		"Wo": layer.Wo,
-		"Bi": layer.Bi,
-		"Bf": layer.Bf,
-		"Bg": layer.Bg,
-		"Bo": layer.Bo,
+func (layer *Lstm) Params() []*tensor.Tensor {
+	return []*tensor.Tensor{
+		layer.Wi,
+		layer.Wf,
+		layer.Wg,
+		layer.Wo,
+		layer.Bi,
+		layer.Bf,
+		layer.Bg,
+		layer.Bo,
 	}
 }
 

@@ -22,7 +22,7 @@ import (
 	"google.golang.org/protobuf/proto"
 )
 
-type loadFunc func(name string, params map[string]*tensor.Tensor, args map[string]float32) layer.Layer
+type loadFunc func(name string, params []*tensor.Tensor, args map[string]float32) layer.Layer
 
 var loadFuncs = map[string]loadFunc{
 	"linear":     layer.LoadLinear,
@@ -79,9 +79,7 @@ func (n *Net) GetOptimizer() optimizer.Optimizer {
 func (n *Net) Params() []*tensor.Tensor {
 	var ret []*tensor.Tensor
 	for _, l := range n.layers {
-		for _, p := range l.Params() {
-			ret = append(ret, p)
-		}
+		ret = append(ret, l.Params()...)
 	}
 	return ret
 }
@@ -119,17 +117,15 @@ func (n *Net) WriteTo(w io.Writer) (int64, error) {
 		net.Layers[i] = new(pb.Layer)
 		net.Layers[i].Class = n.layers[i].Class()
 		net.Layers[i].Name = n.layers[i].Name()
-		net.Layers[i].Params = make(map[string]*pb.Param)
-		for name, p := range n.layers[i].Params() {
+		for j, p := range n.layers[i].Params() {
 			var param pb.Param
 			param.Type = uint32(p.ScalarType())
 			param.ElemCount = p.ElemCount()
-			param.Name = name
 			param.Shapes = make([]int64, p.Dims())
 			copy(param.Shapes, p.Shapes())
-			param.File = fmt.Sprintf("layer_%d_param_%s.bin", i, name)
+			param.File = fmt.Sprintf("layer_%d_param_%d.bin", i, j)
 			params[param.File] = p
-			net.Layers[i].Params[name] = &param
+			net.Layers[i].Params = append(net.Layers[i].Params, &param)
 		}
 		net.Layers[i].Args = n.layers[i].Args()
 	}
@@ -332,15 +328,16 @@ func (n *Net) ReadFrom(r io.ReaderAt, size int64) (int64, error) {
 		}
 		go func(i int) {
 			defer wg.Done()
-			params := make(map[string]*tensor.Tensor)
+			var params []*tensor.Tensor
 			for _, param := range layers[i].GetParams() {
-				params[param.GetName()], err = n.loadParam(zr,
+				p, err := n.loadParam(zr,
 					param.GetFile(),
 					consts.ScalarType(param.GetType()),
 					param.GetElemCount(),
 					param.GetShapes())
-				params[param.GetName()].SetRequiresGrad(true)
 				runtime.Assert(err)
+				p.SetRequiresGrad(true)
+				params = append(params, p)
 			}
 			n.layers[i] = fn(layers[i].GetName(), params, layers[i].GetArgs())
 		}(i)

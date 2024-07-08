@@ -20,11 +20,11 @@ func NewLinear(name string, input, output int, opts ...LayerCreateOption) *Linea
 	return &layer
 }
 
-func LoadLinear(name string, params map[string]*tensor.Tensor, args map[string]float32) Layer {
+func LoadLinear(name string, params []*tensor.Tensor, args map[string]float32) Layer {
 	var layer Linear
 	layer.new("linear", name)
 	layer.output = int(args["output"])
-	layer.w = params["w"]
+	layer.w = params[0]
 	return &layer
 }
 
@@ -32,9 +32,9 @@ func (layer *Linear) Forward(x *tensor.Tensor) *tensor.Tensor {
 	return x.MatMul(layer.w.Transpose(0, 1))
 }
 
-func (layer *Linear) Params() map[string]*tensor.Tensor {
-	return map[string]*tensor.Tensor{
-		"w": layer.w,
+func (layer *Linear) Params() []*tensor.Tensor {
+	return []*tensor.Tensor{
+		layer.w,
 	}
 }
 

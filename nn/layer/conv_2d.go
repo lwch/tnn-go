@@ -49,7 +49,7 @@ func (layer *Conv2D) SetGroups(groups int) {
 	layer.groups = groups
 }
 
-func LoadConv2D(name string, params map[string]*tensor.Tensor, args map[string]float32) Layer {
+func LoadConv2D(name string, params []*tensor.Tensor, args map[string]float32) Layer {
 	var layer Conv2D
 	layer.new("conv2d", name)
 	layer.inC = int(args["inC"])
@@ -59,8 +59,8 @@ func LoadConv2D(name string, params map[string]*tensor.Tensor, args map[string]f
 	layer.padding = [2]int{int(args["padding1"]), int(args["padding2"])}
 	layer.dilation = int(args["dilation"])
 	layer.groups = int(args["groups"])
-	layer.w = params["w"]
-	layer.b = params["b"]
+	layer.w = params[0]
+	layer.b = params[1]
 	return &layer
 }
 
@@ -72,10 +72,10 @@ func (layer *Conv2D) Forward(x *tensor.Tensor) *tensor.Tensor {
 		tensor.Conv2DGroups(layer.groups))
 }
 
-func (layer *Conv2D) Params() map[string]*tensor.Tensor {
-	return map[string]*tensor.Tensor{
-		"w": layer.w,
-		"b": layer.b,
+func (layer *Conv2D) Params() []*tensor.Tensor {
+	return []*tensor.Tensor{
+		layer.w,
+		layer.b,
 	}
 }
 

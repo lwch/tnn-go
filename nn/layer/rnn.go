@@ -25,14 +25,14 @@ func NewRnn(name string, featureSize, steps, hidden int, opts ...LayerCreateOpti
 	return &layer
 }
 
-func LoadRnn(name string, params map[string]*tensor.Tensor, args map[string]float32) Layer {
+func LoadRnn(name string, params []*tensor.Tensor, args map[string]float32) Layer {
 	var layer Rnn
 	layer.new("rnn", name)
 	layer.featureSize = int(args["feature_size"])
 	layer.steps = int(args["steps"])
 	layer.hidden = int(args["hidden"])
-	layer.w = params["w"]
-	layer.b = params["b"]
+	layer.w = params[0]
+	layer.b = params[1]
 	return &layer
 }
 
@@ -63,10 +63,10 @@ func (layer *Rnn) Forward(x, h *tensor.Tensor) (*tensor.Tensor, *tensor.Tensor) 
 		copyState(h)
 }
 
-func (layer *Rnn) Params() map[string]*tensor.Tensor {
-	return map[string]*tensor.Tensor{
-		"w": layer.w,
-		"b": layer.b,
+func (layer *Rnn) Params() []*tensor.Tensor {
+	return []*tensor.Tensor{
+		layer.w,
+		layer.b,
 	}
 }
 

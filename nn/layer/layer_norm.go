@@ -21,11 +21,11 @@ func NewLayerNorm(name string, dims int64, opts ...LayerCreateOption) *LayerNorm
 	return &layer
 }
 
-func LoadLayerNorm(name string, params map[string]*tensor.Tensor, args map[string]float32) Layer {
+func LoadLayerNorm(name string, params []*tensor.Tensor, args map[string]float32) Layer {
 	var layer LayerNorm
 	layer.new("layer_norm", name)
 	layer.eps = layer.initN(1e-9)
-	layer.a = params["a"]
+	layer.a = params[0]
 	return &layer
 }
 
@@ -38,9 +38,9 @@ func (layer *LayerNorm) Forward(x *tensor.Tensor) *tensor.Tensor {
 	return div.Mul(layer.a)
 }
 
-func (layer *LayerNorm) Params() map[string]*tensor.Tensor {
-	return map[string]*tensor.Tensor{
-		"a": layer.a,
+func (layer *LayerNorm) Params() []*tensor.Tensor {
+	return []*tensor.Tensor{
+		layer.a,
 	}
 }
 

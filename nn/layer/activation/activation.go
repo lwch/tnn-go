@@ -31,7 +31,7 @@ func (layer *base) Name() string {
 	return layer.name
 }
 
-func (layer *base) Params() map[string]*tensor.Tensor {
+func (layer *base) Params() []*tensor.Tensor {
 	return nil
 }
 

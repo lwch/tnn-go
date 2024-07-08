@@ -177,7 +177,7 @@ func (m *Model) showModelInfo() {
 	table.Append([]string{"total", fmt.Sprintf("%d", total)})
 }
 
-func paramSize(params map[string]*tensor.Tensor) int64 {
+func paramSize(params []*tensor.Tensor) int64 {
 	var ret int64
 	for _, p := range params {
 		size := int64(1)

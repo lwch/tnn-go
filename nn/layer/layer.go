@@ -11,7 +11,7 @@ import (
 )
 
 type Layer interface {
-	Params() map[string]*tensor.Tensor
+	Params() []*tensor.Tensor
 	Class() string
 	Name() string
 	Args() map[string]float32
@@ -76,7 +76,7 @@ func (b *base) Name() string {
 	return b.name
 }
 
-func (b *base) Params() map[string]*tensor.Tensor {
+func (b *base) Params() []*tensor.Tensor {
 	return nil
 }
 

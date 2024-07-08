@@ -17,7 +17,7 @@ func NewDropout(name string, keep float64) *Dropout {
 	return &layer
 }
 
-func LoadDropout(name string, _ map[string]*tensor.Tensor, args map[string]float32) Layer {
+func LoadDropout(name string, _ []*tensor.Tensor, args map[string]float32) Layer {
 	var layer Dropout
 	layer.new("dropout", name)
 	layer.keep = float64(args["keep"])

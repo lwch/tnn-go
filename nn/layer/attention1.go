@@ -38,7 +38,7 @@ func NewAttention1(name string, dims, heads int, dropout float64, rope bool, opt
 	return &layer
 }
 
-func LoadAttention1(name string, params map[string]*tensor.Tensor, args map[string]float32) Layer {
+func LoadAttention1(name string, params []*tensor.Tensor, args map[string]float32) Layer {
 	var layer Attention1
 	layer.new("attention1", name)
 	layer.dims = int(args["dims"])
@@ -49,9 +49,9 @@ func LoadAttention1(name string, params map[string]*tensor.Tensor, args map[stri
 	if layer.ropeBase <= 0 {
 		layer.ropeBase = 10000
 	}
-	layer.q = params["q"]
-	layer.k = params["k"]
-	layer.v = params["v"]
+	layer.q = params[0]
+	layer.k = params[1]
+	layer.v = params[2]
 	layer.scale = layer.initN(math.Sqrt(float64(layer.dims)))
 	return &layer
 }
@@ -154,11 +154,11 @@ func buildCausal(q, k *tensor.Tensor, device consts.DeviceType) *tensor.Tensor {
 		tensor.WithDevice(device))
 }
 
-func (layer *Attention1) Params() map[string]*tensor.Tensor {
-	return map[string]*tensor.Tensor{
-		"q": layer.q,
-		"k": layer.k,
-		"v": layer.v,
+func (layer *Attention1) Params() []*tensor.Tensor {
+	return []*tensor.Tensor{
+		layer.q,
+		layer.k,
+		layer.v,
 	}
 }
 

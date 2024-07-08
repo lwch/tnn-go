@@ -38,7 +38,7 @@ func NewAttention(name string, dims, heads int, dropout float64, rope bool, opts
 	return &layer
 }
 
-func LoadAttention(name string, params map[string]*tensor.Tensor, args map[string]float32) Layer {
+func LoadAttention(name string, params []*tensor.Tensor, args map[string]float32) Layer {
 	var layer Attention
 	layer.new("attention", name)
 	layer.dims = int(args["dims"])
@@ -49,9 +49,9 @@ func LoadAttention(name string, params map[string]*tensor.Tensor, args map[strin
 	if layer.ropeBase <= 0 {
 		layer.ropeBase = 10000
 	}
-	layer.q = params["q"]
-	layer.k = params["k"]
-	layer.v = params["v"]
+	layer.q = params[0]
+	layer.k = params[1]
+	layer.v = params[2]
 	layer.scale = layer.initN(math.Sqrt(float64(layer.dims)))
 	return &layer
 }
@@ -167,11 +167,11 @@ func (layer *Attention) split(x *tensor.Tensor) *tensor.Tensor {
 	return x.View(-1, x.Shapes()[1], int64(layer.heads), int64(layer.dims/layer.heads))
 }
 
-func (layer *Attention) Params() map[string]*tensor.Tensor {
-	return map[string]*tensor.Tensor{
-		"q": layer.q,
-		"k": layer.k,
-		"v": layer.v,
+func (layer *Attention) Params() []*tensor.Tensor {
+	return []*tensor.Tensor{
+		layer.q,
+		layer.k,
+		layer.v,
 	}
 }
 
