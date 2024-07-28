@@ -36,3 +36,6 @@ func (layer *Dropout) Args() map[string]float32 {
 
 func (layer *Dropout) ToScalarType(t consts.ScalarType) {
 }
+
+func (layer *Dropout) Reset() {
+}

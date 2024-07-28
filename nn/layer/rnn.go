@@ -92,3 +92,8 @@ func (layer *Rnn) ToScalarType(t consts.ScalarType) {
 	layer.w = layer.w.ToScalarType(t)
 	layer.b = layer.b.ToScalarType(t)
 }
+
+func (layer *Rnn) Reset() {
+	layer.w = layer.initW(layer.w.Shapes()...)
+	layer.b = layer.initB(layer.b.Shapes()...)
+}

@@ -193,3 +193,9 @@ func (layer *Attention1) ToScalarType(t consts.ScalarType) {
 	layer.k = layer.k.ToScalarType(t)
 	layer.v = layer.v.ToScalarType(t)
 }
+
+func (layer *Attention1) Reset() {
+	layer.q = layer.initW(layer.q.Shapes()...)
+	layer.k = layer.initW(layer.k.Shapes()...)
+	layer.v = layer.initW(layer.v.Shapes()...)
+}

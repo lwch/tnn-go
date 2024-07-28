@@ -79,3 +79,6 @@ func (layer *MaxPool1D) Args() map[string]float32 {
 
 func (layer *MaxPool1D) ToScalarType(t consts.ScalarType) {
 }
+
+func (layer *MaxPool1D) Reset() {
+}

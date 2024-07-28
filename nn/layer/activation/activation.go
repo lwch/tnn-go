@@ -50,3 +50,7 @@ func (*base) Unfreeze() {
 func (*base) ToScalarType(t consts.ScalarType) {
 	// activation have no params
 }
+
+func (*base) Reset() {
+	// activation have no params
+}

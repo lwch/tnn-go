@@ -55,3 +55,7 @@ func (layer *Linear) Unfreeze() {
 func (layer *Linear) ToScalarType(t consts.ScalarType) {
 	layer.w = layer.w.ToScalarType(t)
 }
+
+func (layer *Linear) Reset() {
+	layer.w = layer.initW(layer.w.Shapes()...)
+}

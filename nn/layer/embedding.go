@@ -67,3 +67,7 @@ func (layer *Embedding) Unfreeze() {
 func (layer *Embedding) ToScalarType(t consts.ScalarType) {
 	layer.w = layer.w.ToScalarType(t)
 }
+
+func (layer *Embedding) Reset() {
+	layer.w = layer.initW(layer.w.Shapes()...)
+}

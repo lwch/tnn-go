@@ -32,3 +32,6 @@ func (layer *Flatten) Forward(x *tensor.Tensor) *tensor.Tensor {
 
 func (layer *Flatten) ToScalarType(t consts.ScalarType) {
 }
+
+func (layer *Flatten) Reset() {
+}

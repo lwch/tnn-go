@@ -143,3 +143,14 @@ func (layer *Lstm) ToScalarType(t consts.ScalarType) {
 	layer.Bg = layer.Bg.ToScalarType(t)
 	layer.Bo = layer.Bo.ToScalarType(t)
 }
+
+func (layer *Lstm) Reset() {
+	layer.Wi = layer.initW(layer.Wi.Shapes()...)
+	layer.Wf = layer.initW(layer.Wf.Shapes()...)
+	layer.Wg = layer.initW(layer.Wg.Shapes()...)
+	layer.Wo = layer.initW(layer.Wo.Shapes()...)
+	layer.Bi = layer.initB(layer.Bi.Shapes()...)
+	layer.Bf = layer.initB(layer.Bf.Shapes()...)
+	layer.Bg = layer.initB(layer.Bg.Shapes()...)
+	layer.Bo = layer.initB(layer.Bo.Shapes()...)
+}

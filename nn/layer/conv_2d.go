@@ -101,3 +101,7 @@ func (layer *Conv2D) Unfreeze() {
 func (layer *Conv2D) ToScalarType(t consts.ScalarType) {
 	layer.w = layer.w.ToScalarType(t)
 }
+
+func (layer *Conv2D) Reset() {
+	layer.w = layer.initW(layer.w.Shapes()...)
+}

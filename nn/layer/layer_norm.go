@@ -55,3 +55,8 @@ func (layer *LayerNorm) Unfreeze() {
 func (layer *LayerNorm) ToScalarType(t consts.ScalarType) {
 	layer.a = layer.a.ToScalarType(t)
 }
+
+func (layer *LayerNorm) Reset() {
+	layer.a = layer.ones(layer.a.Shapes()...)
+	layer.a.SetRequiresGrad(true)
+}

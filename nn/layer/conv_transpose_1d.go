@@ -107,3 +107,7 @@ func (layer *ConvTranspose1D) Unfreeze() {
 func (layer *ConvTranspose1D) ToScalarType(t consts.ScalarType) {
 	layer.w = layer.w.ToScalarType(t)
 }
+
+func (layer *ConvTranspose1D) Reset() {
+	layer.w = layer.initW(layer.w.Shapes()...)
+}

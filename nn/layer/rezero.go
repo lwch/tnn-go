@@ -51,3 +51,8 @@ func (layer *ReZero) Unfreeze() {
 func (layer *ReZero) ToScalarType(t consts.ScalarType) {
 	layer.scale = layer.scale.ToScalarType(t)
 }
+
+func (layer *ReZero) Reset() {
+	layer.scale = layer.initN(0)
+	layer.scale.SetRequiresGrad(true)
+}

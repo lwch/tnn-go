@@ -18,6 +18,7 @@ type Layer interface {
 	Freeze()
 	Unfreeze()
 	ToScalarType(t consts.ScalarType)
+	Reset()
 }
 
 type base struct {
